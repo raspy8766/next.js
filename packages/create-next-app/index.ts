@@ -14,6 +14,7 @@ import packageJson from './package.json'
 import ciInfo from 'ci-info'
 import { isFolderEmpty } from './helpers/is-folder-empty'
 import fs from 'fs'
+import glp from 'glp'
 
 let projectPath: string = ''
 
@@ -57,13 +58,13 @@ const program = new Commander.Command(packageJson.name)
   Initialize as a JavaScript project.
 `
   )
-  .option(
-    '--tailwind',
-    `
+//   .option(
+//     '--tailwind',
+//     `
 
-  Initialize with Tailwind CSS config. (default)
-`
-  )
+//   Initialize with Tailwind CSS config. (default)
+// `
+//   )
   .option(
     '--eslint',
     `
@@ -145,8 +146,11 @@ const program = new Commander.Command(packageJson.name)
 
   Explicitly tell the CLI to reset any stored preferences
 `
-  )
-  .allowUnknownOption()
+  );
+
+  glp.options.forEach(args => program.option(...args));
+
+  program.allowUnknownOption()
   .parse(process.argv)
 
 const packageManager = !!program.useNpm
@@ -252,7 +256,7 @@ async function run(): Promise<void> {
     const defaults: typeof preferences = {
       typescript: true,
       eslint: true,
-      tailwind: true,
+      tailwind: false,
       app: true,
       srcDir: false,
       importAlias: '@/*',
@@ -425,6 +429,8 @@ async function run(): Promise<void> {
       }
     }
   }
+
+  glp.handleOptions(program)
 
   try {
     await createApp({
